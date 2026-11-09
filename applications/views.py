@@ -1,27 +1,70 @@
-"""Представления списка заявлений и карточки заявления."""
+from django.core.paginator import Paginator
+from django.db.models import Count, Q
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, render
 
-from django.http import Http404, HttpRequest, HttpResponse
-from django.shortcuts import render
-
-import storage
+from applications.models import Application, Status
 
 
 def index(request: HttpRequest) -> HttpResponse:
-    """Показать все заявления."""
-    _, _, applications = storage.load_data()
-    return render(request, "applications/index.html", {
-        "applications": applications,
-    })
+    query = request.GET.get("q", "").strip()
+    status_id = request.GET.get("status", "").strip()
+    sort = request.GET.get("sort", "newest").strip()
+    ordering = {
+        "newest": "-created_at",
+        "oldest": "created_at",
+        "title": "title",
+        "-title": "-title",
+    }.get(sort, "-created_at")
+    applications = Application.objects.with_related().all()
+    if query:
+        applications = applications.search(query)
+    if status_id.isdigit():
+        applications = applications.filter(status_id=int(status_id))
+    applications = applications.order_by(ordering, "-pk")
+    page_obj = Paginator(applications, 5).get_page(request.GET.get("page"))
+    return render(
+        request,
+        "applications/index.html",
+        {
+            "applications": page_obj,
+            "page_obj": page_obj,
+            "statuses": Status.objects.order_by("id"),
+            "query": query,
+            "selected_status": status_id,
+            "selected_sort": sort,
+        },
+    )
 
 
 def detail(request: HttpRequest, application_id: int) -> HttpResponse:
-    """Показать заявление, документы и комментарии."""
-    _, _, applications = storage.load_data()
-    application = next(
-        (item for item in applications if item.id == application_id), None
+    application = get_object_or_404(
+        Application.objects.with_related(),
+        pk=application_id,
     )
-    if application is None:
-        raise Http404("Заявление не найдено")
-    return render(request, "applications/detail.html", {
-        "application": application,
-    })
+    return render(
+        request, "applications/detail.html", {"application": application}
+    )
+
+
+def statistics(request: HttpRequest) -> HttpResponse:
+    status_rows = list(
+        Status.objects.annotate(
+            application_count=Count("applications", distinct=True)
+        ).order_by("id")
+    )
+    totals = Application.objects.aggregate(
+        total=Count("pk"),
+        active=Count("pk", filter=Q(status__is_final=False)),
+        final=Count("pk", filter=Q(status__is_final=True)),
+    )
+    grouped = list(
+        Application.objects.values("status__name", "status__is_final")
+        .annotate(total=Count("pk"))
+        .order_by("status__name")
+    )
+    return render(
+        request,
+        "applications/statistics.html",
+        {"status_rows": status_rows, "totals": totals, "grouped": grouped},
+    )

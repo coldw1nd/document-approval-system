@@ -2,9 +2,22 @@
 {% block title %}Заявления · Электронные заявления{% endblock %}
 {% block content %}
 <section class="page-heading"><p class="eyebrow">Реестр обращений</p><h1>Электронные заявления</h1><p>Просмотр заявлений и текущего этапа их обработки.</p></section>
+<form class="filter-panel" method="get">
+  <label>Поиск <input type="search" name="q" value="{{ query }}" placeholder="Название, описание или заявитель"></label>
+  <label>Статус <select name="status"><option value="">Все статусы</option>{% for status in statuses %}<option value="{{ status.id }}" {% if selected_status == status.id|stringformat:"s" %}selected{% endif %}>{{ status.name }}</option>{% endfor %}</select></label>
+  <label>Сортировка <select name="sort"><option value="newest" {% if selected_sort == "newest" %}selected{% endif %}>Сначала новые</option><option value="oldest" {% if selected_sort == "oldest" %}selected{% endif %}>Сначала старые</option><option value="title" {% if selected_sort == "title" %}selected{% endif %}>По названию А–Я</option><option value="-title" {% if selected_sort == "-title" %}selected{% endif %}>По названию Я–А</option></select></label>
+  <button class="button" type="submit">Применить</button>
+</form>
 {% for application in applications %}
   {% include "includes/application_card.html" with application=application %}
 {% empty %}
   <section class="empty-state"><h2>Заявлений пока нет</h2><p>В реестре отсутствуют записи.</p></section>
 {% endfor %}
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="Страницы">
+  {% if page_obj.has_previous %}<a href="?q={{ query|urlencode }}&status={{ selected_status }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}
+  <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?q={{ query|urlencode }}&status={{ selected_status }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}">Далее</a>{% endif %}
+</nav>
+{% endif %}
 {% endblock %}

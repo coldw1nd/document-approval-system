@@ -9,13 +9,13 @@
   <div class="meta-line"><span>Заявитель: <a href="{% url 'users:detail' application.applicant.id %}">{{ application.applicant.full_name }}</a></span><span>Создано: {{ application.created_at|date:"d.m.Y" }}</span></div>
 </section>
 <div class="two-columns">
-  <section class="panel"><div class="section-heading"><h2>Документы</h2><span class="count-pill">{{ application.documents|length }}</span></div>
-    {% for document in application.documents %}
+  <section class="panel"><div class="section-heading"><h2>Документы</h2><span class="count-pill">{{ application.documents.all|length }}</span></div>
+    {% for document in application.documents.all %}
       <article class="list-row"><div><h3>{{ document.name }}</h3><p>{{ document.description|default:"Описание отсутствует" }}</p></div><time>{{ document.uploaded_at|date:"d.m.Y" }}</time></article>
     {% empty %}<p class="empty-message">Документы не приложены.</p>{% endfor %}
   </section>
-  <section class="panel"><div class="section-heading"><h2>Комментарии</h2><span class="count-pill">{{ application.comments|length }}</span></div>
-    {% for comment in application.comments %}
+  <section class="panel"><div class="section-heading"><h2>Комментарии</h2><span class="count-pill">{{ application.comments.all|length }}</span></div>
+    {% for comment in application.comments.all %}
       <article class="comment"><div class="comment__author">{{ comment.author.full_name }}</div><p>{{ comment.text }}</p><time>{{ comment.created_at|date:"d.m.Y" }}</time></article>
     {% empty %}<p class="empty-message">Комментариев пока нет.</p>{% endfor %}
   </section>

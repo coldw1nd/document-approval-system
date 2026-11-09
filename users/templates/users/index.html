@@ -4,7 +4,7 @@
 <section class="page-heading"><p class="eyebrow">Участники системы</p><h1>Пользователи</h1><p>Заявители и участники обработки обращений.</p></section>
 <div class="user-grid">
 {% for row in user_rows %}
-  <article class="user-card"><div class="avatar">{{ row.user.full_name|slice:":1"|upper }}</div><h2><a href="{% url 'users:detail' row.user.id %}">{{ row.user.full_name }}</a></h2><p>{{ row.user.email|default:"Электронная почта не указана" }}</p><span class="meta-chip">Заявлений: {{ row.application_count }}</span></article>
+  <article class="user-card"><div class="avatar">{{ row.full_name|slice:":1"|upper }}</div><h2><a href="{% url 'users:detail' row.id %}">{{ row.full_name }}</a></h2><p>{{ row.email|default:"Электронная почта не указана" }}</p><span class="meta-chip">Заявлений: {{ row.application_count }}</span></article>
 {% empty %}<p class="empty-message">Пользователи не найдены.</p>{% endfor %}
 </div>
 {% endblock %}

@@ -1,5 +1,3 @@
-"""Настройки Django для учебного проекта."""
-
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -8,6 +6,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver"]
 
 INSTALLED_APPS = [
+    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -46,15 +45,12 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
-
-# На этих этапах данные проекта хранятся в JSON; ORM не используется.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
 LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Europe/Moscow"
 USE_I18N = True

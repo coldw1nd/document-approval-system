@@ -1,14 +1,12 @@
 <article class="application-card">
   <div class="application-card__top">
-    <h2 class="application-card__title">
-      <a href="{% url 'applications:detail' application.id %}">{{ application.title|default:"Без названия" }}</a>
-    </h2>
+    <h2 class="application-card__title"><a href="{% url 'applications:detail' application.id %}">{{ application.title|default:"Без названия" }}</a></h2>
     {% include "includes/status_badge.html" with status=application.status %}
   </div>
   <p>{{ application.description|default:"Описание не указано"|truncatechars:150 }}</p>
   <div class="meta-line">
     <span>Заявитель: <a href="{% url 'users:detail' application.applicant.id %}">{{ application.applicant.full_name }}</a></span>
     <span>Создано: {{ application.created_at|date:"d.m.Y" }}</span>
-    <span>Документы: {{ application.documents|length }}</span>
+    <span>Документы: {{ application.documents.all|length }}</span>
   </div>
 </article>

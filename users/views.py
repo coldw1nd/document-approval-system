@@ -1,36 +1,25 @@
-"""Представления списка пользователей и карточки пользователя."""
+from django.db.models import Count
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, render
 
-from django.http import Http404, HttpRequest, HttpResponse
-from django.shortcuts import render
-
-import storage
+from applications.models import Application
+from users.models import User
 
 
 def index(request: HttpRequest) -> HttpResponse:
-    """Показать пользователей системы."""
-    users, _, applications = storage.load_data()
-    user_rows = [
-        {
-            "user": user,
-            "application_count": sum(
-                1 for app in applications if app.applicant.id == user.id
-            ),
-        }
-        for user in users
-    ]
+    user_rows = User.objects.annotate(
+        application_count=Count("applications", distinct=True)
+    ).order_by("full_name")
     return render(request, "users/index.html", {"user_rows": user_rows})
 
 
 def detail(request: HttpRequest, user_id: int) -> HttpResponse:
-    """Показать пользователя и его заявления."""
-    users, _, applications = storage.load_data()
-    user = next((item for item in users if item.id == user_id), None)
-    if user is None:
-        raise Http404("Пользователь не найден")
-    user_applications = [
-        item for item in applications if item.applicant.id == user.id
-    ]
-    return render(request, "users/detail.html", {
-        "user": user,
-        "applications": user_applications,
-    })
+    user = get_object_or_404(User, pk=user_id)
+    applications = Application.objects.with_related().filter(
+        applicant=user
+    ).order_by("-created_at", "-pk")
+    return render(
+        request,
+        "users/detail.html",
+        {"user": user, "applications": applications},
+    )

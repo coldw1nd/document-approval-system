@@ -2,7 +2,7 @@
 {% block title %}Документы · Электронные заявления{% endblock %}
 {% block content %}
 <section class="page-heading"><p class="eyebrow">Приложенные файлы</p><h1>Документы</h1><p>Документы, связанные с электронными заявлениями.</p></section>
-{% for row in documents %}
-  <article class="document-row"><div class="document-icon">PDF</div><div class="document-row__body"><h2>{{ row.document.name }}</h2><p>{{ row.document.description|default:"Описание не указано" }}</p><span class="meta-line">Заявление: <a href="{% url 'applications:detail' row.application.id %}">{{ row.application.title }}</a></span></div><time>{{ row.document.uploaded_at|date:"d.m.Y" }}</time></article>
+{% for document in documents %}
+  <article class="document-row"><div class="document-icon">PDF</div><div class="document-row__body"><h2>{{ document.name }}</h2><p>{{ document.description|default:"Описание не указано" }}</p><span class="meta-line">Заявление: <a href="{% url 'applications:detail' document.application.id %}">{{ document.application.title }}</a></span></div><time>{{ document.uploaded_at|date:"d.m.Y" }}</time></article>
 {% empty %}<section class="empty-state"><h2>Документы не найдены</h2><p>В демонстрационных данных пока нет документов.</p></section>{% endfor %}
 {% endblock %}
