@@ -8,8 +8,16 @@ class Document(models.Model):
         related_name="documents",
         verbose_name="Заявление",
     )
-    name = models.CharField(max_length=255, verbose_name="Имя документа")
-    description = models.TextField(blank=True, verbose_name="Описание")
+    name = models.CharField(
+        max_length=255,
+        verbose_name="Имя документа",
+        help_text="Имя приложенного к заявлению документа.",
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name="Описание",
+        help_text="Краткое описание содержимого документа.",
+    )
     uploaded_at = models.DateField(verbose_name="Дата загрузки")
 
     class Meta:

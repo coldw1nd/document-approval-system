@@ -52,12 +52,21 @@ def import_records() -> None:
                     "email": row["email"],
                 },
             )
+        status_codes = {
+            "Черновик": Status.Code.DRAFT,
+            "На рассмотрении": Status.Code.REVIEW,
+            "Одобрено": Status.Code.APPROVED,
+            "Отклонено": Status.Code.REJECTED,
+        }
         for row in source_statuses:
             Status.objects.update_or_create(
                 pk=row["id"],
                 defaults={
                     "name": row["name"],
                     "is_final": bool(row["is_final"]),
+                    "code": status_codes.get(
+                        row["name"], f"status-{row['id']}"
+                    ),
                 },
             )
         for row in source_applications:

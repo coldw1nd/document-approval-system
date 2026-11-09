@@ -3,5 +3,5 @@
 {% block content %}
 <section class="page-heading"><p class="eyebrow">Сводные показатели</p><h1>Статистика заявлений</h1></section>
 <section class="stats-grid"><article class="stat-card"><span>Всего заявлений</span><strong>{{ totals.total }}</strong></article><article class="stat-card"><span>В работе</span><strong>{{ totals.active }}</strong></article><article class="stat-card"><span>Завершено</span><strong>{{ totals.final }}</strong></article></section>
-<section class="panel"><h2>Распределение по статусам</h2>{% for row in grouped %}<article class="list-row"><strong>{{ row.status__name }}</strong><span>{{ row.total }}</span></article>{% empty %}<p class="empty-message">Данных пока нет.</p>{% endfor %}</section>
+<section class="panel"><h2>Распределение по статусам</h2>{% for row in grouped %}<article class="list-row"><strong>{{ row.status_name }}</strong><span>{{ row.total }}</span></article>{% empty %}<p class="empty-message">Данных пока нет.</p>{% endfor %}</section>
 {% endblock %}

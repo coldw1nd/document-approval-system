@@ -1,5 +1,6 @@
 import pytest
 from django.test import Client
+from django.urls import reverse
 
 from applications.models import Application, Comment, Status
 from documents.models import Document
@@ -13,8 +14,8 @@ def seeded_records(db):
         defaults={"full_name": "Тестовый заявитель"},
     )
     status, _ = Status.objects.get_or_create(
-        name="Тестовый статус",
-        defaults={"is_final": False},
+        code=Status.Code.DRAFT,
+        defaults={"name": "Черновик теста", "is_final": False},
     )
     application, _ = Application.objects.get_or_create(
         pk=9001,
@@ -53,6 +54,7 @@ def test_main_routes_return_successful_responses(seeded_records) -> None:
         f"/users/{seeded_records.applicant_id}/",
         "/documents/",
         "/applications/statistics/",
+        "/admin/login/",
     ]
     for path in paths:
         response = client.get(path)
@@ -65,15 +67,32 @@ def test_unknown_application_returns_404() -> None:
     assert response.status_code == 404
 
 
-def test_application_search_returns_matching_record(seeded_records) -> None:
-    response = Client().get("/applications/", {"q": "Тестовое"})
+def test_application_search_and_pagination(seeded_records) -> None:
+    response = Client().get(
+        "/applications/",
+        {"q": "Тестовое", "sort": "newest", "page": "1"},
+    )
     assert response.status_code == 200
     assert "Тестовое заявление" in response.content.decode("utf-8")
 
 
-def test_application_relations_are_available(seeded_records) -> None:
-    application = Application.objects.with_related().get(pk=seeded_records.pk)
-    assert application.applicant.full_name == "Тестовый заявитель"
-    assert application.status.name == "Тестовый статус"
-    assert application.documents.count() == 1
-    assert application.comments.first().author_id == application.applicant_id
+def test_status_manager_and_generated_field(seeded_records) -> None:
+    application = Application.objects.active().get(pk=seeded_records.pk)
+    assert application.description_length == len(application.description)
+    assert (
+        Application.objects.finalized()
+        .filter(pk=application.pk)
+        .count()
+        == 0
+    )
+
+
+def test_application_slug_route(seeded_records) -> None:
+    seeded_records.refresh_from_db()
+    response = Client().get(seeded_records.get_absolute_url())
+    assert response.status_code == 200
+
+
+def test_admin_index_requires_authentication() -> None:
+    response = Client().get(reverse("admin:index"))
+    assert response.status_code == 302

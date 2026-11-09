@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Сервис электронных заявлений{% endblock %}</title>
+  <title>{% block title %}{{ site_name|default:"Сервис электронных заявлений" }}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'homepage/css/style.css' %}">
   <link rel="stylesheet" href="{% static 'homepage/css/orm.css' %}">
 </head>
@@ -22,7 +22,7 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="site-footer">
-    <div class="container">Учебный проект · <span data-current-year>2026</span></div>
+    <div class="container">Учебный проект · {{ applications_count }} заявлений · <span data-current-year>2026</span></div>
   </footer>
   <script src="{% static 'homepage/js/app.js' %}" defer></script>
 </body>

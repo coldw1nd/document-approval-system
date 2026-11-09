@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 
@@ -21,7 +21,10 @@ def index(request: HttpRequest) -> HttpResponse:
         applications = applications.search(query)
     if status_id.isdigit():
         applications = applications.filter(status_id=int(status_id))
-    applications = applications.order_by(ordering, "-pk")
+    applications = applications.annotate(
+        documents_count=Count("documents", distinct=True),
+        comments_count=Count("comments", distinct=True),
+    ).order_by(ordering, "-pk")
     page_obj = Paginator(applications, 5).get_page(request.GET.get("page"))
     return render(
         request,
@@ -47,6 +50,16 @@ def detail(request: HttpRequest, application_id: int) -> HttpResponse:
     )
 
 
+def slug_detail(request: HttpRequest, slug: str) -> HttpResponse:
+    application = get_object_or_404(
+        Application.objects.with_related(),
+        slug=slug,
+    )
+    return render(
+        request, "applications/detail.html", {"application": application}
+    )
+
+
 def statistics(request: HttpRequest) -> HttpResponse:
     status_rows = list(
         Status.objects.annotate(
@@ -55,13 +68,26 @@ def statistics(request: HttpRequest) -> HttpResponse:
     )
     totals = Application.objects.aggregate(
         total=Count("pk"),
-        active=Count("pk", filter=Q(status__is_final=False)),
-        final=Count("pk", filter=Q(status__is_final=True)),
+        active=Count(
+            "pk",
+            filter=Q(
+                status__code__in=[Status.Code.DRAFT, Status.Code.REVIEW]
+            ),
+        ),
+        final=Count(
+            "pk",
+            filter=Q(
+                status__code__in=[Status.Code.APPROVED, Status.Code.REJECTED]
+            ),
+        ),
     )
     grouped = list(
-        Application.objects.values("status__name", "status__is_final")
+        Application.objects.values(
+            status_name=F("status__name"),
+            status_code=F("status__code"),
+        )
         .annotate(total=Count("pk"))
-        .order_by("status__name")
+        .order_by("status_name")
     )
     return render(
         request,

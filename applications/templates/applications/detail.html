@@ -6,7 +6,7 @@
   <p class="eyebrow">Заявление №{{ application.id }}</p>
   <div class="application-card__top"><h1>{{ application.title }}</h1>{% include "includes/status_badge.html" with status=application.status %}</div>
   <p class="detail-description">{{ application.description|default:"Описание не указано" }}</p>
-  <div class="meta-line"><span>Заявитель: <a href="{% url 'users:detail' application.applicant.id %}">{{ application.applicant.full_name }}</a></span><span>Создано: {{ application.created_at|date:"d.m.Y" }}</span></div>
+  <div class="meta-line"><span>Заявитель: <a href="{% url 'users:detail' application.applicant.id %}">{{ application.applicant.full_name }}</a></span><span>Создано: {{ application.created_at|date:"d.m.Y" }}</span><span>Длина описания: {{ application.description_length }}</span></div>
 </section>
 <div class="two-columns">
   <section class="panel"><div class="section-heading"><h2>Документы</h2><span class="count-pill">{{ application.documents.all|length }}</span></div>

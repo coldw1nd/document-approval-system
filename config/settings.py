@@ -1,9 +1,11 @@
+from importlib.util import find_spec
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "development-only-key-change-before-deployment"
 DEBUG = True
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver"]
+INTERNAL_IPS = ["127.0.0.1"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -27,6 +29,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if find_spec("debug_toolbar"):
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(1, "debug_toolbar.middleware.DebugToolbarMiddleware")
+
 ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
@@ -39,6 +46,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "applications.context_processors.application_context",
             ],
         },
     },
